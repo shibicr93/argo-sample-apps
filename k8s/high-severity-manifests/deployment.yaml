@@ -73,3 +73,117 @@ roleRef:
   kind: Role
   name: high-severity-app-role
   apiGroup: rbac.authorization.k8s.io
+---
+# PreSync Hook for High Severity - Critical Analysis
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: drift-analysis-presync-high-
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-2"
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: drift-analyzer
+        image: drift-analyzer:latest
+        imagePullPolicy: Never
+        env:
+        - name: APP_NAME
+          value: "high-severity-app"
+        - name: SEVERITY
+          value: "high"
+        - name: NAMESPACE
+          value: "enhanced-high-severity"
+        - name: CRITICAL_MODE
+          value: "true"
+        - name: SECURITY_SCAN
+          value: "enabled"
+        command: ["python", "/app/analyze_drift.py"]
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "200m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+---
+# PostSync Hook for High Severity - Emergency Audit
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: audit-logger-postsync-high-
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: audit-logger
+        image: audit-logger:latest
+        imagePullPolicy: Never
+        env:
+        - name: APP_NAME
+          value: "high-severity-app"
+        - name: SEVERITY
+          value: "high"
+        - name: NAMESPACE
+          value: "enhanced-high-severity"
+        - name: ACTION
+          value: "emergency_remediation_completed"
+        - name: COMPLIANCE_MODE
+          value: "strict"
+        - name: NOTIFY_ONCALL
+          value: "true"
+        command: ["python", "/app/log_audit.py"]
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "200m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+---
+# SyncFail Hook for High Severity - Immediate Emergency Response
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: emergency-rollback-syncfail-high-
+  annotations:
+    argocd.argoproj.io/hook: SyncFail
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: emergency-rollback
+        image: emergency-rollback:latest
+        imagePullPolicy: Never
+        env:
+        - name: APP_NAME
+          value: "high-severity-app"
+        - name: SEVERITY
+          value: "high"
+        - name: NAMESPACE
+          value: "enhanced-high-severity"
+        - name: ESCALATION_LEVEL
+          value: "immediate_emergency"
+        - name: TRIGGER_ONCALL
+          value: "true"
+        - name: ROLLBACK_MODE
+          value: "aggressive"
+        command: ["python", "/app/emergency_rollback.py"]
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "200m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"

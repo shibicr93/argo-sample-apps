@@ -52,3 +52,105 @@ data:
     level: medium
     auto_remediate: conditional
     timeout: 24h
+---
+# PreSync Hook for Medium Severity
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: drift-analysis-presync-medium-
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: drift-analyzer
+        image: drift-analyzer:latest
+        imagePullPolicy: Never
+        env:
+        - name: APP_NAME
+          value: "medium-severity-app"
+        - name: SEVERITY
+          value: "medium"
+        - name: NAMESPACE
+          value: "enhanced-medium-severity"
+        command: ["python", "/app/analyze_drift.py"]
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+---
+# PostSync Hook for Medium Severity
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: audit-logger-postsync-medium-
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: audit-logger
+        image: audit-logger:latest
+        imagePullPolicy: Never
+        env:
+        - name: APP_NAME
+          value: "medium-severity-app"
+        - name: SEVERITY
+          value: "medium"
+        - name: NAMESPACE
+          value: "enhanced-medium-severity"
+        - name: ACTION
+          value: "approval_workflow_triggered"
+        command: ["python", "/app/log_audit.py"]
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+---
+# SyncFail Hook for Medium Severity
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: emergency-rollback-syncfail-medium-
+  annotations:
+    argocd.argoproj.io/hook: SyncFail
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: emergency-rollback
+        image: emergency-rollback:latest
+        imagePullPolicy: Never
+        env:
+        - name: APP_NAME
+          value: "medium-severity-app"
+        - name: SEVERITY
+          value: "medium"
+        - name: NAMESPACE
+          value: "enhanced-medium-severity"
+        - name: ESCALATION_LEVEL
+          value: "approval_timeout"
+        command: ["python", "/app/emergency_rollback.py"]
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
