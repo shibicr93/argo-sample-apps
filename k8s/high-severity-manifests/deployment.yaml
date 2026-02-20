@@ -32,3 +32,16 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "2000m"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: high-severity-secrets
+  namespace: drift-demo
+  labels:
+    app: high-severity-app
+    app.kubernetes.io/part-of: drift-demo
+type: Opaque
+data:
+  JWT_SECRET: c3VwZXItc2VjcmV0LWtleS0xMjM=
+  DB_PASSWORD: cGFzc3dvcmQxMjM=
