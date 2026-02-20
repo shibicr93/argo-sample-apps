@@ -30,3 +30,24 @@ spec:
           limits:
             memory: "256Mi"
             cpu: "1000m"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: medium-severity-config
+  namespace: drift-demo
+  labels:
+    app: medium-severity-app
+    app.kubernetes.io/part-of: drift-demo
+data:
+  config.json: |
+    {
+      "port": 8080,
+      "environment": "production",
+      "features": {
+        "cache": true,
+        "analytics": true
+      },
+      "version": "1.0.0"
+    }
