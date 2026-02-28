@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: medium-severity-app
+  name: petstore-ui
   labels:
-    app: medium-severity-app
+    app: petstore-ui
     drift-severity: "medium"
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: medium-severity-app
+      app: petstore-ui
   template:
     metadata:
       labels:
-        app: medium-severity-app
+        app: petstore-ui
     spec:
       containers:
       - name: app
@@ -35,10 +35,10 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: medium-severity-config
+  name: petstore-ui-config
   namespace: drift-demo
   labels:
-    app: medium-severity-app
+    app: petstore-ui
     app.kubernetes.io/part-of: drift-demo
 data:
   config.json: |

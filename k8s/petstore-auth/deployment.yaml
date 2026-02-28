@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: high-severity-app
+  name: petstore-auth
   labels:
-    app: high-severity-app
+    app: petstore-auth
     drift-severity: "high"
 spec:
   replicas: 5
   selector:
     matchLabels:
-      app: high-severity-app
+      app: petstore-auth
   template:
     metadata:
       labels:
-        app: high-severity-app
+        app: petstore-auth
     spec:
       containers:
       - name: app
@@ -36,10 +36,10 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: high-severity-secrets
+  name: petstore-auth-secrets
   namespace: drift-demo
   labels:
-    app: high-severity-app
+    app: petstore-auth
     app.kubernetes.io/part-of: drift-demo
 type: Opaque
 data:

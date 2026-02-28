@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: low-severity-app
+  name: petstore-backend-app
   labels:
-    app: low-severity-app
+    app: petstore-backend-app
     drift-severity: "low"
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: low-severity-app
+      app: petstore-backend-app
   template:
     metadata:
       labels:
-        app: low-severity-app
+        app: petstore-backend-app
     spec:
       containers:
       - name: app
